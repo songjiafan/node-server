@@ -1,28 +1,16 @@
-const cluster = require('cluster')
-const os = require('os')
 const express = require('express')
+const clusterInit = require('./cluster')
 const app = express()
 
-if (cluster.isMaster) {
-  const cpuCoreNum = os.cpus().length
-  for (let i = 0; i < cpuCoreNum; i++) {
-    cluster.fork()
-  }
-
-  for (const id in cluster.workers) {
-    cluster.workers[id].on('message', e => {
-      console.log(e)
-    });
-  }
-} else {
+function httpInit () {
   app.get('/', function(req, res) {
     console.log(process.pid)
     res.send('Hello World!');
   });
- 
-  var server = app.listen(4000, function() {
-    console.log('Server started on port 3000', process.pid);
+  
+  app.listen(4000, function() {
+    console.log('Server started on port 4000', process.pid);
   });
 }
 
-
+clusterInit(httpInit)
